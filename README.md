@@ -59,3 +59,57 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+
+# 🚀 Proyecto Laravel 12 - Consumo de API Pública
+
+Este proyecto es un ejemplo en **Laravel 12** que consume datos desde una API pública y los muestra con paginación y búsqueda.  
+Actualmente **no requiere base de datos**.
+
+---
+
+## 📋 Requisitos
+
+- PHP 8.2 o superior  
+- Composer  
+- Node.js + npm (opcional, solo si querés recompilar assets con Vite)  
+
+---
+
+## ⚙️ Instalación
+
+Clonar el proyecto o descargarlo:
+
+```bash
+git clone <repo_url> mi-proyecto
+cd mi-proyecto
+
+## 📦 Instalar dependencias de PHP
+composer install
+
+## 📑 Copiar el archivo de entorno
+cp .env.example .env
+
+## ▶️ Ejecutar el servidor
+php artisan serve
+
+Abrir en el navegador:
+http://localhost:8000/posts
+
+## 📂 Estructura principal
+app/Http/Controllers/PostController.php → Lógica para consumir la API.
+resources/views/layouts/app.blade.php → Layout base (HTML, navbar, footer).
+resources/views/posts.blade.php → Listado con paginación y búsqueda.
+resources/views/post.blade.php → Vista de detalle de un post.
+
+## 🌎 API usada
+
+Se consumen datos desde:
+JSONPlaceholder (API pública de prueba para desarrollo).
+
+## 📜 Notas
+
+El proyecto está en español (paginación traducida).
+Se usa TailwindCSS vía CDN para estilos rápidos.
+Puede usarse como base para proyectos que luego incluyan base de datos.
