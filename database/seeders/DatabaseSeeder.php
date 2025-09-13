@@ -13,11 +13,18 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Crear usuario de prueba
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Ejecutar seeder de productos (consume API externa)
+        $this->call([
+            ProductSeeder::class,
+        ]);
+
+        $this->command->info('✅ Base de datos poblada exitosamente!');
+        $this->command->info('🌐 Visita: http://localhost:8000/products');
     }
 }
