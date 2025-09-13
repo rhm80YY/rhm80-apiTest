@@ -74,10 +74,32 @@ if [ -z "$DB_DATABASE" ] || [ -z "$DB_USERNAME" ]; then
 else
     echo "✅ Configuración de BD encontrada: ${DB_DATABASE}"
     
-    # Intentar ejecutar migraciones y seeders
+    # Verificar si la base de datos existe
     echo ""
-    echo "🏗️  Configurando base de datos..."
-    echo "   (Esto creará la BD, tablas y datos automáticamente)"
+    echo "🏗️  Verificando si existe la base de datos..."
+    
+    # Intentar conectar a la base de datos
+    mysql -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "USE $DB_DATABASE" 2>/dev/null
+    
+    if [ $? -ne 0 ]; then
+        echo "⚠️  Base de datos '$DB_DATABASE' no existe. Creándola..."
+        mysql -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB_DATABASE CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci" 2>/dev/null
+        
+        if [ $? -ne 0 ]; then
+            echo "❌ Error: No se pudo crear la base de datos"
+            echo "   Por favor, crea la BD manualmente:"
+            echo "   mysql -u $DB_USERNAME -p -e \"CREATE DATABASE $DB_DATABASE\""
+            exit 1
+        else
+            echo "✅ Base de datos '$DB_DATABASE' creada exitosamente"
+        fi
+    else
+        echo "✅ Base de datos '$DB_DATABASE' ya existe"
+    fi
+    
+    echo ""
+    echo "🏗️  Ejecutando migraciones y seeders..."
+    echo "   (Esto creará las tablas y datos automáticamente)"
     
     php artisan migrate:fresh --seed --no-interaction
     

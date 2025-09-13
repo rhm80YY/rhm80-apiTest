@@ -75,17 +75,26 @@ DB_USERNAME=tu_usuario_mysql
 DB_PASSWORD=tu_contraseña_mysql
 ```
 
-### **5. Configurar TODO Automáticamente (Un solo comando)**
+### **5. Crear Base de Datos MySQL**
 ```bash
-# Este comando hace TODO: crea BD, ejecuta migraciones y seeders
+# PRIMERO: Crear la base de datos manualmente
+mysql -u tu_usuario_mysql -p
+
+# Dentro de MySQL:
+CREATE DATABASE laravel_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+EXIT;
+```
+
+### **6. Ejecutar Migraciones y Seeders**
+```bash
+# Ahora sí, ejecutar migraciones y seeders
 php artisan migrate:fresh --seed
 ```
 
 **¿Qué hace este comando?**
-- ✅ **Crea automáticamente la base de datos** si no existe
 - ✅ **Ejecuta todas las migraciones** (crea tablas)
 - ✅ **Ejecuta todos los seeders** (llena datos desde API)
-- ✅ **Todo en un solo paso** sin intervención manual
+- ⚠️  **NO crea la base de datos** (debe existir previamente)
 
 ### **5.1 Alternativa: Paso a Paso**
 Si prefieres hacerlo paso a paso:
@@ -116,7 +125,7 @@ npm install
 npm run build
 ```
 
-### **6. Iniciar Servidor de Desarrollo**
+### **7. Iniciar Servidor de Desarrollo**
 ```bash
 php artisan serve
 ```
@@ -130,12 +139,15 @@ php artisan serve
 Si ya tienes PHP, Composer y MySQL configurados:
 
 ```bash
-# Clone y setup completo en 4 comandos
+# 1. Clonar y configurar
 git clone https://github.com/rhm80YY/rhm80-apiTest.git
 cd rhm80-apiTest
 composer install && cp .env.example .env && php artisan key:generate
 
-# Editar .env con credenciales MySQL, luego:
+# 2. Crear base de datos MySQL
+mysql -u tu_usuario -p -e "CREATE DATABASE laravel_api"
+
+# 3. Editar .env con credenciales MySQL, luego:
 php artisan migrate:fresh --seed && php artisan serve
 ```
 
@@ -287,13 +299,13 @@ sudo yum install php-mysql
 - Probar conexión manual: `mysql -u usuario -p`
 
 ### **Error: "Base de datos no existe"**
-**Laravel puede crearla automáticamente:**
+**Laravel NO puede crear la BD, debes crearla manualmente:**
 ```bash
-# Laravel crea la BD automáticamente con migrate:fresh
-php artisan migrate:fresh --seed
+# OBLIGATORIO: Crear base de datos antes de migrate
+mysql -u tu_usuario -p -e "CREATE DATABASE laravel_api"
 
-# O crear manualmente si es necesario:
-mysql -u root -p -e "CREATE DATABASE laravel_api"
+# Luego ejecutar migraciones
+php artisan migrate:fresh --seed
 ```
 
 ### **Error: "API seeder failed"**
