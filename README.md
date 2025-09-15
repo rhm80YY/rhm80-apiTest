@@ -35,10 +35,13 @@ Este proyecto Laravel implementa un sistema completo que:
 - `php-zip`
 - `php-bcmath`
 - `php-tokenizer`
+- `php-openssl` (importante para HTTPS/SSL)
 
 ---
 
 ## 🚀 **Instalación Paso a Paso**
+
+> **⚠️ Importante:** Este proyecto utiliza Laravel/Guzzle para consumir APIs externas vía HTTPS. Es esencial configurar correctamente los certificados SSL para evitar errores de conexión.
 
 ### **1. Clonar el Repositorio**
 ```bash
@@ -46,12 +49,92 @@ git clone https://github.com/rhm80YY/rhm80-apiTest.git
 cd rhm80-apiTest
 ```
 
-### **2. Instalar Dependencias PHP**
+### **2. Configuración Específica por Sistema Operativo**
+
+#### **🐧 Linux (Ubuntu/Debian)**
+
+**Instalar dependencias del sistema:**
 ```bash
+# Actualizar repositorios
+sudo apt update
+
+# Instalar PHP y extensiones necesarias
+sudo apt install php8.2 php8.2-cli php8.2-mysql php8.2-mbstring php8.2-xml php8.2-curl php8.2-zip php8.2-bcmath php8.2-tokenizer php8.2-openssl
+
+# Instalar Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# Verificar certificados SSL (generalmente ya están configurados)
+php -r "print_r(openssl_get_cert_locations());"
+```
+
+**Para CentOS/RHEL:**
+```bash
+# Instalar repositorio EPEL
+sudo yum install epel-release
+
+# Instalar PHP y extensiones
+sudo yum install php php-cli php-mysql php-mbstring php-xml php-curl php-zip php-bcmath php-tokenizer php-openssl
+```
+
+#### **💻 Windows**
+
+**⚠️ Configuración OBLIGATORIA para Windows:**
+
+PHP en Windows NO incluye certificados SSL por defecto, lo que causará errores al consumir APIs HTTPS.
+
+**Paso 1: Descargar certificados SSL**
+```powershell
+# Crear directorio para certificados
+mkdir C:\php\extras\ssl
+
+# Descargar cacert.pem desde curl.se
+Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile "C:\php\extras\ssl\cacert.pem"
+```
+
+**Paso 2: Configurar php.ini**
+
+Editar el archivo `php.ini` y agregar/modificar las siguientes líneas:
+
+```ini
+; Configuración SSL para Windows
+curl.cainfo = "C:\php\extras\ssl\cacert.pem"
+openssl.cafile = "C:\php\extras\ssl\cacert.pem"
+
+; Habilitar extensiones necesarias
+extension=curl
+extension=openssl
+extension=mbstring
+extension=pdo_mysql
+extension=zip
+```
+
+**Paso 3: Reiniciar servidor web/PHP**
+```powershell
+# Si usas XAMPP
+net stop apache2.4
+net start apache2.4
+
+# Si usas servidor integrado de PHP, reiniciar el comando
+```
+
+**Verificar configuración SSL:**
+```powershell
+# Verificar que los certificados estén configurados
+php -r "var_dump(ini_get('curl.cainfo')); var_dump(ini_get('openssl.cafile'));"
+
+# Probar conexión HTTPS
+php -r "echo file_get_contents('https://jsonplaceholder.typicode.com/posts/1');"
+```
+
+### **3. Instalar Dependencias PHP**
+```bash
+# En todos los sistemas
 composer install
 ```
 
-### **3. Configurar Variables de Entorno**
+### **4. Configurar Variables de Entorno**
 ```bash
 # Copiar archivo de configuración
 cp .env.example .env
@@ -60,7 +143,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-### **4. Configurar Base de Datos MySQL**
+### **5. Configurar Base de Datos MySQL**
 
 #### **Editar archivo .env**
 Editar el archivo `.env` con tus credenciales MySQL:
@@ -75,7 +158,7 @@ DB_USERNAME=tu_usuario_mysql
 DB_PASSWORD=tu_contraseña_mysql
 ```
 
-### **5. Crear Base de Datos MySQL**
+### **6. Crear Base de Datos MySQL**
 ```bash
 # PRIMERO: Crear la base de datos manualmente
 mysql -u tu_usuario_mysql -p
@@ -85,7 +168,7 @@ CREATE DATABASE laravel_api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 EXIT;
 ```
 
-### **6. Ejecutar Migraciones y Seeders**
+### **7. Ejecutar Migraciones y Seeders**
 ```bash
 # Ahora sí, ejecutar migraciones y seeders
 php artisan migrate:fresh --seed
@@ -96,7 +179,7 @@ php artisan migrate:fresh --seed
 - ✅ **Ejecuta todos los seeders** (llena datos desde API)
 - ⚠️  **NO crea la base de datos** (debe existir previamente)
 
-### **5.1 Alternativa: Paso a Paso**
+### **7.1 Alternativa: Paso a Paso**
 Si prefieres hacerlo paso a paso:
 
 ```bash
@@ -110,13 +193,13 @@ php artisan migrate
 php artisan db:seed --class=ProductSeeder
 ```
 
-### **7. Configurar Storage (opcional)**
+### **8. Configurar Storage (opcional)**
 ```bash
 # Crear enlace simbólico para storage público
 php artisan storage:link
 ```
 
-### **8. Instalar Assets Frontend (opcional)**
+### **9. Instalar Assets Frontend (opcional)**
 ```bash
 # Instalar dependencias Node.js
 npm install
@@ -125,7 +208,7 @@ npm install
 npm run build
 ```
 
-### **7. Iniciar Servidor de Desarrollo**
+### **10. Iniciar Servidor de Desarrollo**
 ```bash
 php artisan serve
 ```
@@ -136,7 +219,9 @@ php artisan serve
 
 ## ⚡ **Instalación Express (Para usuarios avanzados)**
 
-Si ya tienes PHP, Composer y MySQL configurados:
+> **⚠️ Importante:** Si estás en Windows, DEBES configurar los certificados SSL primero (ver sección Windows arriba).
+
+Si ya tienes PHP, Composer, MySQL y SSL configurados:
 
 ```bash
 # 1. Clonar y configurar
@@ -152,6 +237,11 @@ php artisan migrate:fresh --seed && php artisan serve
 ```
 
 **¡Listo!** La aplicación estará funcionando en http://localhost:8000/products
+
+**Si obtienes errores SSL durante el seeder en Windows:**
+1. Detener el proceso (Ctrl+C)
+2. Configurar certificados SSL (ver sección Windows)
+3. Reiniciar: `php artisan migrate:fresh --seed`
 
 ---
 
@@ -285,6 +375,56 @@ SELECT COUNT(*) FROM products;
 
 ## 🐛 **Solución de Problemas Comunes**
 
+### **Error: "SSL certificate problem" o "cURL error 60"**
+
+**💻 Problema específico de Windows:**
+
+Este error aparece al ejecutar los seeders porque PHP no puede verificar certificados SSL de APIs externas.
+
+```
+cURL error 60: SSL certificate problem: unable to get local issuer certificate
+```
+
+**⚙️ Solución:**
+
+1. **Verificar configuración actual:**
+```powershell
+php -r "var_dump(ini_get('curl.cainfo')); var_dump(ini_get('openssl.cafile'));"
+```
+
+2. **Si no está configurado, seguir pasos de la sección Windows:**
+   - Descargar `cacert.pem`
+   - Configurar `php.ini`
+   - Reiniciar servidor
+
+3. **Verificar conexión:**
+```powershell
+php -r "echo file_get_contents('https://jsonplaceholder.typicode.com/posts/1');"
+```
+
+4. **Alternativa temporal (NO recomendada para producción):**
+
+Si necesitas una solución rápida para desarrollo, puedes deshabilitar la verificación SSL editando el seeder:
+
+```php
+// En database/seeders/ProductSeeder.php
+$response = Http::withOptions([
+    'verify' => false, // Solo para desarrollo
+])->get('https://jsonplaceholder.typicode.com/posts');
+```
+
+**🐧 Para Linux:**
+
+Generalmente los certificados SSL ya están configurados, pero si encuentras problemas:
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install ca-certificates
+
+# CentOS/RHEL
+sudo yum update ca-certificates
+```
+
 ### **Error: "could not find driver"**
 ```bash
 # Instalar extensión MySQL para PHP
@@ -309,9 +449,26 @@ php artisan migrate:fresh --seed
 ```
 
 ### **Error: "API seeder failed"**
-- Verificar conexión a internet
-- La API JSONPlaceholder puede estar temporalmente no disponible
-- Reintentar: `php artisan db:seed --class=ProductSeeder`
+
+**Posibles causas:**
+1. **Problemas de SSL/certificados** (especialmente en Windows) - Ver sección anterior
+2. **Conexión a internet** - Verificar conectividad
+3. **API temporalmente no disponible** - JSONPlaceholder puede tener mantenimiento
+4. **Timeout de conexión** - La API puede tardar en responder
+
+**Soluciones:**
+```bash
+# Reintentar seeder
+php artisan db:seed --class=ProductSeeder
+
+# Verificar conectividad a la API
+curl -I https://jsonplaceholder.typicode.com/posts
+
+# Ver logs detallados del error
+tail -f storage/logs/laravel.log
+```
+
+**Si el problema persiste en Windows, revisar configuración SSL.**
 
 ### **Error: "Vistas no se actualizan"**
 ```bash
