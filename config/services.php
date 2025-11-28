@@ -35,10 +35,15 @@ return [
         ],
     ],
 
+    // 'newsapi' => [
+    //     'url' => env('NEWS_API_URL'),
+    //     'token' => env('NEWS_API_TOKEN'),
+    //     'country' => env('NEWS_API_COUNTRY', 'us'),
+    // ],
     'newsapi' => [
-        'url' => env('NEWS_API_URL'),
-        'token' => env('NEWS_API_TOKEN'),
-        'country' => env('NEWS_API_COUNTRY', 'us'),
+        'token'   => env('NEWS_API_KEY'), // Esto lee tu clave del .env
+        'url'     => env('NEWS_API_URL'), // Esto lee la URL del .env
+        'country' => 'ar',                // Aquí definimos el país por defecto
     ],
 
 ];
